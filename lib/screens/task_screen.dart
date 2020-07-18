@@ -1,21 +1,55 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:todoeyflutter/components/task_indicator_card.dart';
 
 import 'package:todoeyflutter/state/todo_state.dart';
+import 'package:todoeyflutter/model/stage.dart';
 import 'package:todoeyflutter/services/auth_service.dart';
+import 'package:todoeyflutter/services/todo_service.dart';
 import 'package:todoeyflutter/constants/styles.dart';
-
+import 'package:todoeyflutter/components/header.dart';
 import 'package:todoeyflutter/components/todo_list.dart';
 import 'package:todoeyflutter/screens/add_task_screen.dart';
 
-class TasksScreen extends StatefulWidget {
+class TasksScreen extends StatelessWidget {
   static final String id = 'TaskScreen';
 
   @override
-  _TasksScreenState createState() => _TasksScreenState();
+  Widget build(BuildContext context) {
+    return ChangeNotifierProxyProvider<TodoService, TodoState>(
+      create: (_) => TodoState(),
+      update: (_, todoService, todoState) => todoState.update(todoService),
+      child: TasksScreenContent(),
+    );
+  }
 }
 
-class _TasksScreenState extends State<TasksScreen> {
+class TasksScreenContent extends StatefulWidget {
+  @override
+  _TasksScreenContentState createState() => _TasksScreenContentState();
+}
+
+class _TasksScreenContentState extends State<TasksScreenContent> {
+  bool _refreshing = false;
+  GlobalKey<RefreshIndicatorState> key;
+
+  @override
+  void initState() {
+    super.initState();
+    key = GlobalKey<RefreshIndicatorState>();
+  }
+
+  Future<void> onRefresh() {
+    this.setState(() {
+      _refreshing = true;
+    });
+    return Provider.of<TodoState>(context, listen: false).get().then((value) {
+      this.setState(() {
+        _refreshing = false;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,12 +60,18 @@ class _TasksScreenState extends State<TasksScreen> {
           showModalBottomSheet(
               context: context,
               isScrollControlled: true,
-              builder: (context) => SingleChildScrollView(
+              builder: (mContext) {
+                final todoState = Provider.of<TodoState>(context);
+                return ChangeNotifierProvider.value(
+                  value: todoState,
+                  child: SingleChildScrollView(
                     child: Container(
                         padding: EdgeInsets.only(
-                            bottom: MediaQuery.of(context).viewInsets.bottom),
+                            bottom: MediaQuery.of(mContext).viewInsets.bottom),
                         child: AddTaskScreen()),
-                  ));
+                  ),
+                );
+              });
         },
         child: Icon(Icons.add),
       ),
@@ -44,36 +84,10 @@ class _TasksScreenState extends State<TasksScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                CircleAvatar(
-                    backgroundColor: Colors.white,
-                    radius: 30.0,
-                    child: Icon(
-                      Icons.list,
-                      size: 30.0,
-                      color: Colors.lightBlueAccent,
-                    )),
-                SizedBox(
-                  height: 10.0,
-                ),
-                Text(
-                  'Todoey',
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 50.0,
-                      fontWeight: FontWeight.w700),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Text(
-                      context.watch<AuthService>().user.email,
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    Text(
-                      '${context.watch<TodoState>().todosCount} Tasks',
-                      style: TextStyle(color: Colors.white, fontSize: 18.0),
-                    ),
-                  ],
+                Header(),
+                TaskIndicatorCard(
+                  username: context.watch<AuthService>().user.email,
+                  tasks: context.watch<TodoState>().todosCount,
                 ),
               ],
             ),
@@ -82,7 +96,13 @@ class _TasksScreenState extends State<TasksScreen> {
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 15.0),
               decoration: kTopRoundBoxDecoration.copyWith(color: Colors.white),
-              child: TodoList(),
+              child: Provider.of<TodoState>(context).stage == Stage.LOADING &&
+                      !_refreshing
+                  ? Center(
+                      child: CircularProgressIndicator(),
+                    )
+                  : RefreshIndicator(
+                      key: key, onRefresh: onRefresh, child: TodoList()),
             ),
           )
         ],

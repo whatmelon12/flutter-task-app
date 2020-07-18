@@ -16,10 +16,6 @@ void main() => runApp(MultiProvider(
     ProxyProvider<AuthService, TodoService>(
       update: (_, authService, __) => TodoService(authService),
     ),
-    ChangeNotifierProxyProvider<TodoService, TodoState>(
-      create: (_) => TodoState(),
-      update: (_, todoService, todoState) => todoState.update(todoService),
-    ),
   ],
   child: TodoeyApp(),
 ));

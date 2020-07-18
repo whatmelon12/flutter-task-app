@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+
+import 'package:todoeyflutter/model/stage.dart';
 import 'package:todoeyflutter/model/todo.dart';
+import 'package:todoeyflutter/mixins/model_state.dart';
 import 'package:todoeyflutter/services/todo_service.dart';
 
-class TodoState with ChangeNotifier {
+class TodoState with ChangeNotifier, ModelState {
   TodoService _todoService;
   List<Todo> _todos;
-  bool loading = false;
 
   TodoState() {
     _todos = List<Todo>();
@@ -13,6 +15,7 @@ class TodoState with ChangeNotifier {
 
   TodoState update(TodoService todoService) {
     _todoService = todoService;
+    get();
     return this;
   }
 
@@ -24,25 +27,54 @@ class TodoState with ChangeNotifier {
     return todos.length;
   }
 
-  toggle({int index}) {
-    _todos[index].toggle();
+  Future<void> toggle({int index}) async {
+    try {
+      final todo = _todos[index];
+      todo.toggle();
+      await _todoService.toggle(todo: todo);
+      updateStage(stage: Stage.DONE);
+    } catch (e) {
+      _handleError(error: e);
+    }
     notifyListeners();
   }
 
-  get() async {
-    final todos = await _todoService.getAll();
-    _todos = todos;
+  Future<void> get() async {
+    updateStageAndNotify(stage: Stage.LOADING);
+    try {
+      _todos = await _todoService.getAll();
+      updateStage(stage: Stage.DONE);
+    } catch (e) {
+      _handleError(error: e);
+    }
     notifyListeners();
   }
 
-  add({Todo todo}) {
-    _todos.add(todo);
+  Future<void> add({Todo todo}) async {
+    updateStageAndNotify(stage: Stage.LOADING);
+    try {
+      final newTodo = await _todoService.create(todo: todo);
+      _todos.add(newTodo);
+      updateStage(stage: Stage.DONE);
+    } catch (e) {
+      _handleError(error: e);
+    }
     notifyListeners();
   }
 
-  remove({int index}) {
-    _todos.removeAt(index);
+  Future<void> remove({int index}) async {
+    try {
+      await _todoService.remove(todo: _todos[index]);
+      _todos.removeAt(index);
+      updateStage(stage: Stage.DONE);
+    } catch (e) {
+     _handleError(error: e);
+    }
     notifyListeners();
   }
 
+  _handleError({dynamic error}) {
+    print(error);
+    updateStage(stage: Stage.ERROR);
+  }
 }

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:todoeyflutter/constants/styles.dart';
-import 'package:todoeyflutter/model/notifiers/todo_notifier.dart';
 import 'package:todoeyflutter/model/todo.dart';
+import 'package:todoeyflutter/state/todo_state.dart';
 
 class AddTaskScreen extends StatefulWidget {
   @override
@@ -49,7 +49,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                 color: Colors.lightBlueAccent,
                 onPressed: () {
                   if(label != null && label.isNotEmpty) {
-                    context.read<TodosNotifier>().add(todo: Todo(
+                    context.read<TodoState>().add(todo: Todo(
                         title: label.trim()
                     ));
                     Navigator.pop(context);

@@ -4,11 +4,13 @@ part 'todo.g.dart';
 
 @JsonSerializable()
 class Todo {
+  @JsonKey(name: '_id')
+  String id;
   String title;
   bool isDone;
 
-  Todo({this.title, this.isDone = false});
-  
+  Todo({this.id, this.title, this.isDone = false});
+
   toggle() {
     isDone = !isDone;
   }
