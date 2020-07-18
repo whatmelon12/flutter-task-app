@@ -1,0 +1,1 @@
+const kBaseUrl = 'https://todo-api-pinkmilkdev.herokuapp.com/api';
