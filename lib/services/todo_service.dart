@@ -17,7 +17,7 @@ class TodoService {
         await http.get(baseUrl, headers: {'authorization': 'Bearer $token'});
     _handleStatusCode(response: res);
 
-    return jsonDecode(res.body)
+    return json.decode(res.body)
         .map((i) => Todo.fromJson(i))
         .cast<Todo>()
         .toList();
@@ -30,24 +30,23 @@ class TodoService {
           'authorization': 'Bearer $token',
           'content-type': 'application/json'
         },
-        body: jsonEncode(todo.toJson()));
+        body: json.encode(todo));
     _handleStatusCode(response: res);
 
-    return Todo.fromJson(jsonDecode(res.body));
+    return Todo.fromJson(json.decode(res.body));
   }
 
   Future<Todo> toggle({Todo todo}) async {
     final token = await _authService.getToken();
-    final json = jsonEncode({'isDone': todo.isDone});
     final res = await http.patch('$baseUrl/${todo.id}',
         headers: {
           'authorization': 'Bearer $token',
           'content-type': 'application/json'
         },
-        body: json);
+        body: json.encode({'isDone': todo.isDone}));
     _handleStatusCode(response: res);
 
-    return Todo.fromJson(jsonDecode(res.body));
+    return Todo.fromJson(json.decode(res.body));
   }
 
   Future<void> remove({Todo todo}) async {

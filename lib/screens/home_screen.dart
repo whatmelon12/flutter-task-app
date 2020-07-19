@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:todoeyflutter/components/header.dart';
 import 'package:todoeyflutter/components/round_button.dart';
 import 'package:todoeyflutter/screens/login_screen.dart';
+import 'package:todoeyflutter/screens/register_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   static const String id = "HomeScreen";
@@ -29,7 +30,9 @@ class HomeScreen extends StatelessWidget {
             RoundButton(
               label: 'Register',
               color: Colors.blueAccent,
-              onPressed: () {},
+              onPressed: () {
+                Navigator.pushNamed(context, RegisterScreen.id);
+              },
             )
           ],
         ),

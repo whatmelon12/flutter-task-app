@@ -4,9 +4,16 @@ import 'package:todoeyflutter/constants/styles.dart';
 import 'package:todoeyflutter/model/account.dart';
 
 class LoginForm extends StatefulWidget {
+  final String buttonLabel;
+  final Color buttonColor;
   final Function(Account) onFormSaved;
 
-  const LoginForm({Key key, @required this.onFormSaved}) : super(key: key);
+  const LoginForm(
+      {Key key,
+        this.buttonLabel = 'Login',
+        this.buttonColor = Colors.lightBlueAccent,
+        @required this.onFormSaved})
+      : super(key: key);
 
   @override
   _LoginFormState createState() => _LoginFormState();
@@ -40,9 +47,7 @@ class _LoginFormState extends State<LoginForm> {
         children: <Widget>[
           TextFormField(
             controller: _emailTextEditingController,
-            decoration: kTextFieldDecoration.copyWith(
-              hintText: "Email"
-            ),
+            decoration: kTextFieldDecoration.copyWith(hintText: "Email"),
             keyboardType: TextInputType.emailAddress,
             validator: (value) => _validateFormField(value, "Email"),
           ),
@@ -52,13 +57,12 @@ class _LoginFormState extends State<LoginForm> {
           TextFormField(
             controller: _passwordTextEditingController,
             obscureText: true,
-            decoration: kTextFieldDecoration.copyWith(
-                hintText: "Password"
-            ),
+            decoration: kTextFieldDecoration.copyWith(hintText: "Password"),
             validator: (value) => _validateFormField(value, "Password"),
           ),
           RoundButton(
-            label: 'Login',
+            label: widget.buttonLabel,
+            color: widget.buttonColor,
             onPressed: _onLoginPressed,
           )
         ],
@@ -71,18 +75,15 @@ class _LoginFormState extends State<LoginForm> {
       _autoValidate = true;
     });
 
-    if(_formKey.currentState.validate()) {
-      widget.onFormSaved(
-        Account(
+    if (_formKey.currentState.validate()) {
+      widget.onFormSaved(Account(
           email: _emailTextEditingController.text,
-          password: _passwordTextEditingController.text
-        )
-      );
+          password: _passwordTextEditingController.text));
     }
   }
 
   String _validateFormField(String value, String fieldName) {
-    if(value.isEmpty) {
+    if (value.isEmpty) {
       return "$fieldName cannot be empty.";
     }
 

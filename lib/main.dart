@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:todoeyflutter/screens/register_screen.dart';
 import 'package:todoeyflutter/services/todo_service.dart';
 
 import 'package:todoeyflutter/state/todo_state.dart';
@@ -28,6 +29,7 @@ class TodoeyApp extends StatelessWidget {
       routes: {
         HomeScreen.id: (_) => HomeScreen(),
         LoginScreen.id: (_) => LoginScreen(),
+        RegisterScreen.id: (_) => RegisterScreen(),
         TasksScreen.id: (_) => TasksScreen(),
       },
     );
